@@ -1,0 +1,3 @@
+[submodule "tidal_api"]
+	path = tidal_api
+	url = https://github.com/JuniorJPDJ/python-tidal
