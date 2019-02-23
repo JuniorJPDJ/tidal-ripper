@@ -92,7 +92,6 @@ if __name__ == "__main__":
 
             elif mode == "1":
                 track_id = input("Enter track id: ")
-                session.get_track()
                 track = session.get_track(track_id)
                 track_name = f'{track.name}{f" ({track.version})" if track.version else ""}'
                 print(f'Downloading track: {track.artist.name} - {track_name}')
