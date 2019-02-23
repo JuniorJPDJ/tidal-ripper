@@ -36,9 +36,9 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
 
     pic = Picture()
     pic.type = id3.PictureType.COVER_FRONT
-    pic.width = 512
-    pic.height = 512
-    pic.mime = 'image/png'
+    pic.width = 640
+    pic.height = 640
+    pic.mime = 'image/jpeg'
     r = requests.get(track.album.image, stream=True)
     r.raw.decode_content = True
     pic.data = r.raw.read()
