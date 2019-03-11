@@ -12,6 +12,22 @@ from mutagen import id3
 from mutagen.flac import Picture, FLAC, FLACNoHeaderError
 
 
+def get_track_title(track):
+    title = track.name.strip()  # just in case
+
+    # add featuring artists if not already
+    if not "(feat." in title and len(track.artists) > 1:
+        title += f' (feat. {" & ".join([x.name for x in track.artists[1:]])})'
+
+    # put track version into title
+    if len(track.artists) > 1:
+        title += f" [{track.version}]" if track.version else ""
+    else:
+        title += f" ({track.version})" if track.version else ""
+
+    return title
+
+
 def download_flac(track: tidalapi.models.Track, file_path, album=None):
     if album is None:
         album = track.album
@@ -26,10 +42,7 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
 
     # general metatags
     audio['artist'] = track.artist.name
-    if not "(feat." in track.name and len(track.artists) > 1:
-        audio['title'] = f'{track.name} (feat. {" & ".join([x.name for x in track.artists[1:]])})'
-    else:
-        audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
+    audio['title'] = get_track_title(track)
 
     # album related metatags
     audio['albumartist'] = album.artist.name
