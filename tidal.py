@@ -42,11 +42,11 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
 
     # general metatags
     audio['artist'] = track.artist.name
-    audio['title'] = get_track_title(track)
+    audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
 
     # album related metatags
     audio['albumartist'] = album.artist.name
-    audio['album'] = album.name
+    audio['album'] = f'{album.name}{f" ({album.version})" if album.version else ""}'
     audio['date'] = str(album.year)
 
     # track/disc position metatags
