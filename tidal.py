@@ -25,13 +25,18 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
     audio = FLAC(data)
 
     # general metatags
-    audio['artist'] = [x.name for x in track.artists]
-    audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
+    audio['artist'] = track.artist.name
+    if not "(feat." in track.name and len(track.artists) > 1:
+        audio['title'] = f'{track.name} (feat. {" & ".join([x.name for x in track.artists[1:]])})'
+    else:
+        audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
+
+    # album related metatags
     audio['albumartist'] = album.artist.name
     audio['album'] = album.name
     audio['date'] = str(album.year)
 
-    # album related metatags
+    # track/disc position metatags
     audio['discnumber'] = str(track.volumeNumber)
     audio['disctotal'] = str(album.numberOfVolumes)
     audio['tracknumber'] = str(track.trackNumber)
