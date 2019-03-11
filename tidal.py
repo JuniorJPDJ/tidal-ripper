@@ -24,15 +24,30 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
     data.seek(0)
     audio = FLAC(data)
 
+    # general metatags
     audio['artist'] = [x.name for x in track.artists]
-    if track.version:
-        audio['version'] = track.version
-    audio['title'] = track.name
+    audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
+    audio['albumartist'] = album.artist.name
     audio['album'] = album.name
-    if album.release_date:
-        audio['date'] = str(album.release_date.year)
-    audio['tracknumber'] = str(track.track_num)
-    audio['discnumber'] = str(track.disc_num)
+    audio['date'] = str(album.year)
+
+    # album related metatags
+    audio['discnumber'] = str(track.volumeNumber)
+    audio['disctotal'] = str(album.numberOfVolumes)
+    audio['tracknumber'] = str(track.trackNumber)
+    audio['tracktotal'] = str(album.numberOfTracks)
+
+    # Tidal sometimes returns null for track copyright
+    if track.copyright:
+        audio['copyright'] = track.copyright
+    elif album.copyright:
+        audio['copyright'] = album.copyright
+
+    # identifiers for later use in own music libraries
+    if track.isrc:
+        audio['isrc'] = track.isrc
+    if album.upc:
+        audio['upc'] = album.upc
 
     pic = Picture()
     pic.type = id3.PictureType.COVER_FRONT
