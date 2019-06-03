@@ -12,6 +12,22 @@ from mutagen import id3
 from mutagen.flac import Picture, FLAC, FLACNoHeaderError
 
 
+def get_track_title(track):
+    title = track.name.strip()  # just in case
+
+    # add featuring artists if not already
+    if not "(feat." in title and len(track.artists) > 1:
+        title += f' (feat. {" & ".join([x.name for x in track.artists[1:]])})'
+
+    # put track version into title
+    if len(track.artists) > 1:
+        title += f" [{track.version}]" if track.version else ""
+    else:
+        title += f" ({track.version})" if track.version else ""
+
+    return title
+
+
 def download_flac(track: tidalapi.models.Track, file_path, album=None):
     if album is None:
         album = track.album
@@ -24,15 +40,32 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
     data.seek(0)
     audio = FLAC(data)
 
-    audio['artist'] = [x.name for x in track.artists]
-    if track.version:
-        audio['version'] = track.version
-    audio['title'] = track.name
-    audio['album'] = album.name
-    if album.release_date:
-        audio['date'] = str(album.release_date.year)
-    audio['tracknumber'] = str(track.track_num)
-    audio['discnumber'] = str(track.disc_num)
+    # general metatags
+    audio['artist'] = track.artist.name
+    audio['title'] = f'{track.name}{f" ({track.version})" if track.version else ""}'
+
+    # album related metatags
+    audio['albumartist'] = album.artist.name
+    audio['album'] = f'{album.name}{f" ({album.version})" if album.version else ""}'
+    audio['date'] = str(album.year)
+
+    # track/disc position metatags
+    audio['discnumber'] = str(track.volumeNumber)
+    audio['disctotal'] = str(album.numberOfVolumes)
+    audio['tracknumber'] = str(track.trackNumber)
+    audio['tracktotal'] = str(album.numberOfTracks)
+
+    # Tidal sometimes returns null for track copyright
+    if track.copyright:
+        audio['copyright'] = track.copyright
+    elif album.copyright:
+        audio['copyright'] = album.copyright
+
+    # identifiers for later use in own music libraries
+    if track.isrc:
+        audio['isrc'] = track.isrc
+    if album.upc:
+        audio['upc'] = album.upc
 
     pic = Picture()
     pic.type = id3.PictureType.COVER_FRONT
@@ -92,7 +125,7 @@ if __name__ == "__main__":
 
             elif mode == "1":
                 track_id = input("Enter track id: ")
-                track = session.get_track(track_id)
+                track = session.get_track(track_id, withAlbum=True)
                 track_name = f'{track.name}{f" ({track.version})" if track.version else ""}'
                 print(f'Downloading track: {track.artist.name} - {track_name}')
                 download_flac(track, folder / f'{track.artist.name} - {track_name}.flac'.replace("/", "_"))
