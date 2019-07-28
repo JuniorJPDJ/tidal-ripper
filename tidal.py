@@ -56,15 +56,15 @@ def download_flac(track: tidalapi.models.Track, file_path, album=None):
     audio['tracktotal'] = str(album.numberOfTracks)
 
     # Tidal sometimes returns null for track copyright
-    if track.copyright:
+    if hasattr(track, 'copyright') and track.copyright:
         audio['copyright'] = track.copyright
-    elif album.copyright:
+    elif hasattr(album, 'copyright') and album.copyright:
         audio['copyright'] = album.copyright
 
     # identifiers for later use in own music libraries
-    if track.isrc:
+    if hasattr(track, 'isrc') and track.isrc:
         audio['isrc'] = track.isrc
-    if album.upc:
+    if hasattr(album, 'upc') and album.upc:
         audio['upc'] = album.upc
 
     pic = Picture()
