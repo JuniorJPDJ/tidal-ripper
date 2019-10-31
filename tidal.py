@@ -92,7 +92,7 @@ if __name__ == "__main__":
     p.add_argument('login', help="TIDAL login/email")
     p.add_argument('password', help="TIDAL password")
     p.add_argument('output_dir', help="output directory (download target)")
-    p.add_argument('--api_token', help="TIDAL API token", default='BI218mwp9ERZ3PFI')
+    p.add_argument('--api_token', help="TIDAL API token", default='kgsOOmYk3zShYrNP')
     args = p.parse_args()
 
     config = tidalapi.Config(tidalapi.Quality.lossless)
